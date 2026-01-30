@@ -763,11 +763,6 @@ let introFinished = false;
 let introFrozen = false;
 
 const introVideo = document.getElementById("introVideo");
-  document.addEventListener("click", () => {
-  introVideo.muted = false;
-  introVideo.play().catch(() => {});
-});
-
 introVideo.addEventListener("error", () => {
   startGame();
 });
@@ -815,4 +810,5 @@ helpOverlay.onclick = (e) => {
 
 </body>
 </html>
+
 
