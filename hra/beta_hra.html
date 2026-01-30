@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Hádej Meme – Singleplayer</title>
+<style>
+body {
+  font-family: 'Poppins', system-ui, sans-serif;
+  background: radial-gradient(circle at top, #0a0a0a, #000);
+  color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow: hidden;
+  cursor: none;
+}
+body {
+    overflow-y: auto;
+}
+
+* {
+  cursor: none !important;
+  box-sizing: border-box;
+}
+#customCursor {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-2px, -2px);
+}
+
+#customCursor::before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 20px solid rgb(255, 0, 191);
+  border-top: 20px solid transparent;
+  filter: drop-shadow(2px 2px 0px #555555);
+}
+.particle {
+  position: fixed;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: float 12s infinite linear;
+  z-index: 0;
+}
+@keyframes float {
+  from { transform: translateY(110vh); }
+  to { transform: translateY(-10vh); }
+}
+:root {
+  --neon: #ffffff;
+  --neon-soft: rgba(255, 255, 255, 0.35);
+  --good: #00ff88;
+  --good-soft: rgba(0, 255, 136, 0.4);
+  --danger: #ff4d6d;
+  --danger-soft: rgba(255, 77, 109, 0.4);
+}
+.start-screen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, #111, #000);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+}
+.start-content {
+  width: 100%;
+  max-width: 700px;
+  text-align: center;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+  color: var(--neon);
+  text-shadow: 0 0 12px var(--neon-soft);
+  letter-spacing: 2px;
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #eee;
+  text-align: center;
+  margin: 30px 0 10px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.mode-row {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+.btn, .mode-btn {
+  padding: 12px 25px;
+  background: var(--neon);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 18px;
+  transition: 0.2s ease;
+  box-shadow: 0 6px 0 rgba(255,255,255,0.4);
+}
+.btn:active, .mode-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 rgba(255,255,255,0.4);
+}
+.mode-btn {
+  font-size: 16px;
+  padding: 10px 18px;
+  background: #333;
+  color: #fff;
+  box-shadow: 0 6px 0 rgba(0,0,0,0.5);
+}
+.mode-btn.active {
+  background: var(--neon);
+  color: #000;
+  box-shadow: 0 6px 0 rgba(255,255,255,0.4);
+}
+.mode-btn.mode-animate {
+  animation: modeAnimate 0.4s ease;
+}
+@keyframes modeAnimate {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+.btn-good {
+  background: var(--good) !important;
+  color: #000 !important;
+  box-shadow: 0 6px 0 var(--good-soft) !important;
+}
+.btn-bad {
+  background: var(--danger) !important;
+  color: #000 !important;
+  box-shadow: 0 6px 0 var(--danger-soft) !important;
+}
+.game-box {
+  background: rgba(25, 25, 25, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 30px;
+  border-radius: 18px;
+  width: 90%;
+  max-width: 900px;
+  box-shadow: 0 0 25px rgba(255,255,255,0.08);
+  display: none;
+  margin: 40px auto;
+  position: relative;
+  z-index: 3;
+}
+.image-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  justify-content: center;
+}
+.img-option {
+  width: 180px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 3px solid rgba(255,255,255,0.15);
+  transition: 0.25s;
+  background: #111;
+  box-shadow: 0 0 12px rgba(255,255,255,0.05);
+  transform-style: preserve-3d;
+}
+.img-option:hover {
+  transform: scale(1.07) rotateY(6deg);
+  border-color: #fff;
+  box-shadow: 0 0 18px rgba(255,255,255,0.4);
+}
+.selected {
+  border-color: #fff !important;
+  box-shadow: 0 0 25px rgba(255,255,255,0.6);
+}
+textarea {
+  width: 70%;
+  height: 70px;
+  background: #111;
+  border: 2px solid #222;
+  border-radius: 10px;
+  color: #fff;
+  padding: 12px;
+  font-size: 16px;
+  transition: 0.25s;
+  display: block;
+  margin: 15px auto 0 auto;
+}
+textarea:focus {
+  border-color: var(--neon);
+  box-shadow: 0 0 12px var(--neon-soft);
+  outline: none;
+}
+.centered-btn-row {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  margin-top: 25px;
+}
+#guessImage {
+  max-width: 300px;
+  border-radius: 12px;
+  display: block;
+  margin: 10px auto 0 auto;
+}
+#preview img {
+  max-width: 300px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(255,255,255,0.15);
+  display: block;
+  margin: 0 auto 10px auto;
+}
+#previewCaption {
+  font-size: 18px;
+  text-align: center;
+}
+
+/* SCORE */
+.score-box {
+  text-align: center;
+  margin-top: 20px;
+}
+#endScreen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #000c;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 10;
+}
+#winnerText {
+  font-size: 40px;
+  color: var(--neon);
+  text-shadow: 0 0 25px var(--neon-soft);
+  margin-bottom: 20px;
+}
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+.fade-out {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-10px); }
+}
+.star-rating {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 18px 0 10px 0;
+  gap: 2px;
+}
+.star {
+  font-size: 2em;
+  cursor: pointer;
+  transition: transform 0.12s, color 0.12s;
+  user-select: none;
+  color: #888;
+}
+.star:hover {
+  transform: scale(1.2) rotate(-8deg);
+  filter: drop-shadow(0 0 6px #ffd70088);
+}
+#helpButton {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  background: #333;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 9999;
+  user-select: none;
+}
+#helpOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9998;
+}
+#helpWindow {
+  background: grey;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  max-width: 90%;
+  text-align: left;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+</style>
+</head>
+
+<body>
+  <div id="helpButton">?</div>
+
+<div id="helpOverlay">
+  <div id="helpWindow">
+    <h2>Pravidla hry</h2>
+    <p>• Vyber obrázek podle módu hry.</p>
+    <p>• Hráč označí hvězdičky podle toho, jak moc se mu obrázek líbí.</p>
+    <p>• Zvuk se přehraje až po výběru hvězdiček.</p>
+    <p>• Kategorie: 2025, IT, All.</p>
+    <p>• Hra pokračuje dalším kolem.</p>
+    <p>• 2025 - poznej ktery meme to je.</p>
+    <p>• IT - Vymysli svuj ale zkus se dodrzit tema.</p>
+    <p>• All - kombinace vseho.</p>
+  </div>
+</div>
+
+<audio id="clickSound" src="click.mp3"></audio>
+
+<div id="introVideoContainer" style="
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:black;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+">
+    <video id="introVideo" autoplay playsinline style="
+      width:100%; 
+      height:100%; 
+      object-fit:cover;">
+        <source src="video/intro.mp4" type="video/mp4">
+    </video>
+</div>
+
+<div id="customCursor"></div>
+
+<div id="startScreen" class="start-screen" style="display:none;">
+
+  <div class="start-content">
+    <h1>🔥 HÁDEJ MEME 🔥</h1>
+
+    <div class="section-title">Vyber mód</div>
+    <div class="mode-row">
+      <button class="mode-btn active" id="mode2025Btn">Meme 2025</button>
+      <button class="mode-btn" id="modeITBtn">IT Meme</button>
+      <button class="mode-btn" id="modeAllBtn">ALL</button>
+    </div>
+
+    <div class="section-title">Začni hru</div>
+    <button class="btn" id="startBtn">Start</button>
+  </div>
+</div>
+
+<div id="gameBox" class="game-box">
+
+  <div id="step1" class="fade-in">
+    <h2 id="imageTitle">Hráč 1: Vyber obrázek</h2>
+    <div id="imageSelect" class="image-select"></div>
+  </div>
+
+  <div id="step2" style="display:none;">
+    <h2 id="captionTitle">Hráč 2: Hádej meme – napiš text</h2>
+    <img id="guessImage" src="">
+    <textarea id="captionText" placeholder="Napiš text k memu..."></textarea>
+    <button class="btn" id="submitCaption">Pokračovat</button>
+  </div>
+
+  <div id="step3" style="display:none;">
+    <h2>Hráč 1: Ohodnoť meme</h2>
+
+    <div id="preview">
+      <img id="previewImage">
+      <p id="previewCaption"></p>
+    </div>
+
+    <div class="star-rating" id="starRating"></div>
+
+    <button class="btn" id="nextRoundBtn" style="display:none; margin-top:25px;">
+      Další kolo
+    </button>
+  </div>
+
+  <div class="score-box">
+    Skóre: Hráč 1: <span id="score1">0</span> | Hráč 2: <span id="score2">0</span>
+  </div>
+</div>
+
+<div id="endScreen">
+  <h1 id="winnerText"></h1>
+  <button class="btn" id="backToStartBtn">Zpět na začátek</button>
+</div>
+
+<script>
+let images2025 = [
+  "2025/67.png","2025/ajajjaj.png","2025/dommer.png","2025/horse-humans.png",
+  "2025/jorke.png","2025/maused.png","2025/mom-homeless.png","2025/nichebaby.png",
+  "2025/onenmor.png","2025/rabclock.png","2025/runaway.png","2025/sybau.png",
+  "2025/tapetfade.png","2025/tu.png","2025/wabisabi.png"
+];
+let soundMap = {
+  "2025/67.png": "2025sound/67-normal.mp3",
+  "2025/ajajjaj.png": "2025sound/cooked-dog-meme.mp3",
+  "2025/dommer.png": "2025sound/domer-made-with-Voicemod.mp3",
+  "2025/horse-humans.png": "2025sound/weare-not-horses-weare-humans.mp3",
+  "2025/jorke.png": "2025sound/chicken-jockey-perfect.mp3",
+  "2025/maused.png": "2025sound/rat-dance-music.mp3",
+  "2025/mom-homeless.png": "2025sound/my-mom-is-kinda-homeless.mp3",
+  "2025/nichebaby.png": "2025sound/niche-baby-made-with-Voicemod.mp3",
+  "2025/onenmor.png": "2025sound/we-pop-out-in-1-in-the-morning.mp3",
+  "2025/rabclock.png": "2025sound/white-rabbit-clock.mp3",
+  "2025/runaway.png": "2025sound/i-want-to-run-away.mp3",
+  "2025/sybau.png": "2025sound/sybau.mp3",
+  "2025/tapetfade.png": "2025sound/imagine-if-ninja-got-a-low-taper-fade.mp3",
+  "2025/tu.png": "2025sound/thank-you-thank-you-thank-you.mp3",
+  "2025/wabisabi.png": "2025sound/wabi-sabi---king-of-the-hill-made-with-Voicemod.mp3"
+};
+
+let imagesIT = [
+  "IT/1.jpg", "IT/2.jpg", "IT/3.jpg","IT/4.jpg","IT/5.jpg","IT/6.jpg","IT/7.jpg","IT/8.jpg",
+  "IT/9.jpg","IT/10.jpg","IT/11.jpg","IT/12.jpg","IT/13.jpg","IT/14.jpg","IT/15.jpg","IT/16.jpg",
+  "IT/17.jpg","IT/18.jpg","IT/19.jpg","IT/20.jpg","IT/21.jpg","IT/22.jpg","IT/23.jpg","IT/24.jpg",
+  "IT/25.jpg","IT/26.jpg","IT/27.jpg","IT/28.jpg"
+];
+
+let soundIT={
+  "I/1.jpg":"IT/ITsound/1.mp3",
+  "IT/2.jpg":"IT/ITsound/2.mp3",
+  "IT/3.jpg":"IT/ITsound/3.mp3",
+  "IT/4.jpg":"IT/ITsound/4.mp3",
+  "IT/5.jpg":"IT/ITsound/5.mp3",
+  "IT/6.jpg":"IT/ITsound/6.mp3",
+  "IT/7.jpg":"IT/ITsound/7.mp3",
+  "IT/8.jpg":"IT/ITsound/8.mp3",
+  "IT/9.jpg":"IT/ITsound/9.mp3",
+  "IT/10.jpg":"IT/ITsound/10.mp3",
+  "IT/11.jpg":"IT/ITsound/11.mp3",
+  "IT/12.jpg":"IT/ITsound/12.mp3",
+  "IT/13.jpg":"IT/ITsound/13.mp3",
+  "IT/14.jpg":"IT/ITsound/14.mp3",
+  "IT/15.jpg":"IT/ITsound/15.mp3",
+  "IT/16.jpg":"IT/ITsound/16.mp3",
+  "IT/17.jpg":"IT/ITsound/17.mp3",
+  "IT/18.jpg":"IT/ITsound/18.mp3",
+  "IT/19.jpg":"IT/ITsound/19.mp3",
+  "IT/20.jpg":"IT/ITsound/20.mp3",
+  "IT/21.jpg":"IT/ITsound/21.mp3",
+  "IT/22.jpg":"IT/ITsound/22.mp3",
+  "IT/23.jpg":"IT/ITsound/23.mp3",
+  "IT/24.jpg":"IT/ITsound/24.mp3",
+  "IT/25.jpg":"IT/ITsound/25.mp3",
+  "IT/26.jpg":"IT/ITsound/26.mp3",
+  "IT/27.jpg":"IT/ITsound/27.mp3",
+  "IT/28.jpg":"IT/ITsound/28.mp3",
+};
+
+let imagesAll = [...images2025, ...imagesIT];
+
+let gameMode = "meme2025";
+let images = [...images2025];
+
+let currentPicker = 1;
+let chosenImage = null;
+let chosenSound = null;
+let writtenCaption = "";
+let score1 = 0;
+let score2 = 0;
+
+function getRandomThree(arr) {
+  if (arr.length <= 3) return [...arr];
+  return [...arr].sort(() => Math.random() - 0.5).slice(0, 3);
+}
+
+function setMode(mode) {
+  gameMode = mode;
+  if (mode === "meme2025") images = [...images2025];
+  if (mode === "ITmeme") images = [...imagesIT];
+  if (mode === "ALL") images = [...imagesAll];
+
+  const btns = [
+    document.getElementById("mode2025Btn"),
+    document.getElementById("modeITBtn"),
+    document.getElementById("modeAllBtn")
+  ];
+  btns.forEach(btn => {
+    btn.classList.remove("active");
+    btn.classList.remove("mode-animate");
+  });
+  let activeBtn;
+  if (mode === "meme2025") activeBtn = btns[0];
+  if (mode === "ITmeme") activeBtn = btns[1];
+  if (mode === "ALL") activeBtn = btns[2];
+  if (activeBtn) {
+    activeBtn.classList.add("active");
+    activeBtn.classList.add("mode-animate");
+    setTimeout(() => activeBtn.classList.remove("mode-animate"), 400);
+  }
+}
+
+let selectedMode = "meme2025";
+document.getElementById("mode2025Btn").onclick = () => {
+  selectedMode = "meme2025";
+  setMode("meme2025");
+};
+document.getElementById("modeITBtn").onclick = () => {
+  selectedMode = "ITmeme";
+  setMode("ITmeme");
+};
+document.getElementById("modeAllBtn").onclick = () => {
+  selectedMode = "ALL";
+  setMode("ALL");
+};
+
+document.getElementById("startBtn").onclick = () => {
+  setMode(selectedMode); 
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("gameBox").style.display = "block";
+  document.getElementById("endScreen").style.display = "none";
+  score1 = 0;
+  score2 = 0;
+  currentPicker = 1;
+  document.getElementById("score1").textContent = 0;
+  document.getElementById("score2").textContent = 0;
+  document.getElementById("captionText").value = "";
+  document.getElementById("previewImage").src = "";
+  document.getElementById("previewCaption").textContent = "";
+  showStep(1);
+  renderImages();
+};
+
+function showStep(step) {
+  const s1 = document.getElementById("step1");
+  const s2 = document.getElementById("step2");
+  const s3 = document.getElementById("step3");
+
+  [s1, s2, s3].forEach(el => {
+    el.style.display = "none";
+    el.classList.remove("fade-in");
+  });
+
+  if (step === 1) {
+    s1.style.display = "block";
+    s1.classList.add("fade-in");
+  }
+  if (step === 2) {
+    s2.style.display = "block";
+    s2.classList.add("fade-in");
+  }
+  if (step === 3) {
+    s3.style.display = "block";
+    s3.classList.add("fade-in");
+  }
+}
+
+function renderImages() {
+  const imageSelect = document.getElementById("imageSelect");
+  imageSelect.innerHTML = "";
+
+  document.getElementById("imageTitle").textContent =
+    `Hráč ${currentPicker}: Vyber obrázek`;
+
+  let selected = getRandomThree(images);
+  if (selected.length === 0) {
+    imageSelect.innerHTML = "<p>Žádné obrázky v tomto módu 😢</p>";
+    return;
+  }
+
+  selected.forEach(src => {
+    const el = document.createElement("img");
+    el.src = src;
+    el.className = "img-option";
+
+    el.onclick = () => {
+      chosenImage = src;
+      chosenSound = soundMap[src] || soundIT[src];
+     document.querySelectorAll(".img-option").forEach(i => i.classList.remove("selected"));
+      el.classList.add("selected");
+
+      goToStep2();
+    };
+
+    imageSelect.appendChild(el);
+  });
+}
+
+function goToStep2() {
+  showStep(2);
+
+  let guessingPlayer = currentPicker === 1 ? 2 : 1;
+  document.getElementById("captionTitle").textContent =
+    `Hráč ${guessingPlayer}: Hádej meme – napiš text`;
+
+  document.getElementById("guessImage").src = chosenImage;
+}
+
+document.getElementById("submitCaption").onclick = () => {
+  writtenCaption = document.getElementById("captionText").value.trim();
+  if (!writtenCaption) return;
+
+  document.getElementById("previewImage").src = chosenImage;
+  document.getElementById("previewCaption").textContent = writtenCaption;
+
+  document.getElementById("captionText").value = "";
+  showStep(3);
+};
+
+function renderStars() {
+    const starRating = document.getElementById("starRating");
+    starRating.innerHTML = "";
+    let selected = 0;
+    for (let i = -5; i <= 5; i++) {
+        if (i === 0) continue;
+        const star = document.createElement("span");
+        star.className = "star";
+        star.textContent = "★";
+        star.dataset.value = i;
+        star.style.cursor = "pointer";
+        star.title = (i > 0 ? "+" : "") + i + " bodů";
+        star.addEventListener("mouseenter", function() {
+            highlightStars(i);
+        });
+        star.addEventListener("mouseleave", function() {
+            highlightStars(selected);
+        });
+        star.addEventListener("click", function() {
+            selected = i;
+            highlightStars(selected);
+            rateMeme(i);
+            playSound();
+        });
+        starRating.appendChild(star);
+    }
+    highlightStars(0);
+}
+
+function highlightStars(value) {
+    const stars = document.querySelectorAll("#starRating .star");
+    stars.forEach(star => {
+        const v = parseInt(star.dataset.value);
+        if ((value > 0 && v > 0 && v <= value) || (value < 0 && v < 0 && v >= value)) {
+            star.style.color = "#ffd700";
+            star.style.textShadow = "0 0 8px #ffd70055";
+        } else {
+            star.style.color = "#888";
+            star.style.textShadow = "none";
+        }
+    });
+}
+
+function rateMeme(points) {
+    let guessingPlayer = currentPicker === 1 ? 2 : 1;
+    if (guessingPlayer === 1) score1 += points;
+    else score2 += points;
+    updateScore();
+    document.getElementById("nextRoundBtn").style.display = "block";
+}
+
+const origShowStep = showStep;
+showStep = function(step) {
+    origShowStep(step);
+    if (step === 3) {
+        renderStars();
+        document.getElementById("nextRoundBtn").style.display = "none";
+    } else {
+        if (document.getElementById("starRating"))
+            document.getElementById("starRating").innerHTML = "";
+    }
+};
+
+function updateScore() {
+  document.getElementById("score1").textContent = score1;
+  document.getElementById("score2").textContent = score2;
+
+  if (score1 >= 50 || score2 >= 50) {
+    let winner = score1 >= 50 ? 1 : 2;
+    document.getElementById("winnerText").textContent = `Hráč ${winner} vítězí!`;
+    document.getElementById("gameBox").style.display = "none";
+    document.getElementById("endScreen").style.display = "flex";
+    return;
+  }
+
+  document.getElementById("nextRoundBtn").style.display = "block";
+}
+let audioPlayer = new Audio();
+
+function playSound() {
+  if (!chosenSound) return;
+  audioPlayer.pause();
+  audioPlayer.currentTime = 0;
+  audioPlayer.src = chosenSound;
+  audioPlayer.play();
+}
+
+document.getElementById("nextRoundBtn").onclick = () => {
+  audioPlayer.pause();
+audioPlayer.currentTime = 0;
+
+  document.getElementById("nextRoundBtn").style.display = "none";
+
+  currentPicker = currentPicker === 1 ? 2 : 1;
+  showStep(1);
+  renderImages();
+};
+
+document.getElementById("backToStartBtn").onclick = () => {
+  audioPlayer.pause();
+  audioPlayer.currentTime = 0;
+
+  score1 = 0;
+  score2 = 0;
+  currentPicker = 1;
+  document.getElementById("score1").textContent = 0;
+  document.getElementById("score2").textContent = 0;
+
+  document.getElementById("endScreen").style.display = "none";
+  document.getElementById("startScreen").style.display = "flex";
+  document.getElementById("gameBox").style.display = "none";
+};
+
+document.addEventListener("mousemove", e => {
+  const cursor = document.getElementById("customCursor");
+  cursor.style.left = e.pageX + "px";
+  cursor.style.top = e.pageY + "px";
+});
+
+for (let i = 0; i < 40; i++) {
+  const p = document.createElement("div");
+  p.className = "particle";
+  p.style.left = Math.random() * 100 + "vw";
+  p.style.animationDelay = (Math.random() * 10) + "s";
+  p.style.animationDuration = (10 + Math.random() * 10) + "s";
+  document.body.appendChild(p);
+}
+let introFinished = false;
+let introFrozen = false;
+
+const introVideo = document.getElementById("introVideo");
+const introContainer = document.getElementById("introVideoContainer");
+introVideo.addEventListener("ended", () => {
+    introFinished = true;
+    introFrozen = true;
+    introVideo.pause();
+    introVideo.currentTime = introVideo.duration;
+    introContainer.style.filter = "grayscale(0.7) blur(2px) brightness(0.7)";
+    introContainer.style.cursor = "pointer";
+});
+
+function hideIntroIfFrozen() {
+    if (introFrozen) {
+        introContainer.style.display = "none";
+        document.getElementById("startScreen").style.display = "flex";
+        introFrozen = false;
+    }
+}
+document.addEventListener("keydown", hideIntroIfFrozen);
+document.addEventListener("mousedown", hideIntroIfFrozen);
+
+document.addEventListener("mousedown", () => {
+    const clickSound = document.getElementById("clickSound");
+    clickSound.currentTime = 0; 
+    clickSound.play();
+});
+
+const helpButton = document.getElementById("helpButton");
+const helpOverlay = document.getElementById("helpOverlay");
+const helpWindow = document.getElementById("helpWindow");
+
+helpButton.onclick = () => {
+  helpOverlay.style.display = "flex";
+};
+
+helpOverlay.onclick = (e) => {
+  if (e.target === helpOverlay) {
+    helpOverlay.style.display = "none";
+  }
+};
+
+</script>
+
+</body>
+</html>
